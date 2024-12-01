@@ -5,7 +5,7 @@
         <v-card flat color="secondary">
           <v-card-title align="center" class="text-h4">VAN 01</v-card-title>
           <div class="text-caption">
-            <v-slider direction="vertical" :min="0" :max="paradas.length - 1" step="1" :ticks="tickLabels" tick-size="8" show-ticks="always" class="w-25 inverted-slider" :model-value="valorSlider">
+            <v-slider direction="vertical" :min="0" :max="tickLabels.length - 1" step="1" tick-size="8" show-ticks="always" :ticks="tickLabels" class="w-25 inverted-slider" v-model="valorSlider" >
             </v-slider>
           </div>
         </v-card>
@@ -36,32 +36,35 @@
   const tickLabels = ref([]);
   const valorSlider = ref(0);
 
+  // Função para carregar as paradas do supabase
   const carregarParadas = async () => {
     const { data, error } = await supabase.from("horarios_paradas_01").select("*").order("id");
 
     if (error) {
       console.error("Erro ao carregar as paradas:", error);
     } else {
-      paradas.value = data;
 
-      // Preenche os labels do slider
-      tickLabels.value = data.map((item) => item.parada);
-      console.log("Tick Labels:", tickLabels.value);
+      paradas.value = data; // Pega a tabela inteira
+      tickLabels.value = data.map((item) => item.parada); // Pega o nome das paradas
+      console.log("Tick Labels:", tickLabels.value); // Exibe pra ver se está funcionando direitinho
     }
   };
 
   // Atualiza o valor do slider com base no horário atual
   const atualizarSlider = () => {
-    const agora = new Date();
+    const agora = new Date();  // Usa o horário atual real
     let indexAtual = -1;
+    let horarioMaisProximo = null;
 
     paradas.value.forEach((parada, index) => {
       for (let i = 1; i <= 12; i++) {
         const horarioStr = parada[`partida_${i}`];
         if (horarioStr) {
-          const horario = new Date(`2000-01-01T${horarioStr}Z`);
-          if (horario <= agora) {
+          const horario = new Date(`2000-01-01T${horarioStr}`);  // Hora local, sem fuso horário
+
+          if (horario <= agora && (!horarioMaisProximo || horario > horarioMaisProximo)) {
             indexAtual = index;
+            horarioMaisProximo = horario;  // Armazena o último horário que passou
           }
         }
       }
@@ -83,7 +86,7 @@
 <style scoped>
 
 :deep(.v-slider.v-input--vertical > .v-input__control) {
-  min-height: 1700px;
+  min-height: 1800px;
 }
 
 :deep(.inverted-slider .v-slider__track-container) {
