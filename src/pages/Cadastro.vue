@@ -87,7 +87,7 @@ const handleRegister = async () => {
 
   try {
     await register(form.value);
-    router.push({ path: '/Conta' });
+    //router.push({ path: '/Conta' });
     alertConfirmacao.value = true;
   } catch (error) {
     erro.value = error?.message || 'Erro Desconhecido';
