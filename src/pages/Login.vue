@@ -8,6 +8,7 @@
               <v-container>
                 <v-img src="@/assets/Rotavan.png" max-width="200" rounded="pill"></v-img>
                 <v-card-title justify="center" align="center" class="text-h4">LOGIN</v-card-title>
+                <v-alert v-if="loginError" type="error" closable>{{ loginError }}</v-alert>
                 <v-form @submit.prevent="handleLogin">
                   <v-row class="mx-15">
                     <v-col cols="12">
@@ -40,25 +41,43 @@
 </template>
 
 <script setup>
-  import useAuthUser from '@/composables/UseAuthUser';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import useAuthUser from '@/composables/UseAuthUser';
 
-  const { login } = useAuthUser()
+const { login } = useAuthUser();
+const router = useRouter();
 
-  const form = ref ({
-    email: '',
-    password: '',
-  })
+const form = ref({
+  email: '',
+  password: '',
+});
 
-  const handleLogin = async () => {
-    try {
-      await login(form.value)
-      router.push({ name: 'me'})
-    } catch (error) {
-      alert(error.message)
-    }
+const loginError = ref(null);
+
+const isValidEmail = (email) => {
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return regex.test(email);
+};
+
+const handleLogin = async () => {
+  loginError.value = null;
+
+  if (!form.value.email || !form.value.password) {
+    loginError.value = "Por favor, preencha todos os campos.";
+    return;
   }
-  // definePageMeta({
-  //   layout: 'layout_login', // Tentando fazer funcionar um layout diferente  
-  // });
 
+  if (!isValidEmail(form.value.email)) {
+    loginError.value = "Por favor, insira um e-mail válido.";
+    return;
+  }
+
+  try {
+    await login(form.value);
+    router.push({ path: '/Conta' });
+  } catch (error) {
+    loginError.value = error.message;
+  }
+};
 </script>
