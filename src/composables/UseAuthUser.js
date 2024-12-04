@@ -8,7 +8,7 @@ export default function useAuthUser () {
     const { supabase } = useSupabase()
 
     const login = async ({ email, password }) => {
-        const { user, error} = await supabase.auth.signIn({ email, password})
+        const { user, error} = await supabase.auth.signInWithPassword({ email, password})
         if (error) throw error
         return user
     }
@@ -33,7 +33,7 @@ export default function useAuthUser () {
             { email, password },
             { 
                 data: meta,
-                redirectTo: `${window.location.origin}/me?Email=registrationConfirmation`
+                redirectTo: `${window.location.origin}/Conta?Email=registrationConfirmation`
             }
         )
         if (error) throw error
